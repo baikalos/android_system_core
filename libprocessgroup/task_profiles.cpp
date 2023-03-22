@@ -531,6 +531,7 @@ void TaskProfile::MoveTo(TaskProfile* profile) {
 
 bool TaskProfile::ExecuteForProcess(uid_t uid, pid_t pid) const {
     for (const auto& element : elements_) {
+        LOG(DEBUG) << "Applying profile action for process " << element->Name() << " for "  << pid << "/" << uid;
         if (!element->ExecuteForProcess(uid, pid)) {
             LOG(VERBOSE) << "Applying profile action " << element->Name() << " failed";
             return false;
@@ -544,8 +545,9 @@ bool TaskProfile::ExecuteForTask(int tid) const {
         tid = GetThreadId();
     }
     for (const auto& element : elements_) {
+        LOG(DEBUG) << "Applying profile action for task " << element->Name() << " for "  << tid;
         if (!element->ExecuteForTask(tid)) {
-            LOG(VERBOSE) << "Applying profile action " << element->Name() << " failed";
+            PLOG(WARNING) << "Applying profile action " << element->Name() << " failed";
             return false;
         }
     }
@@ -813,6 +815,7 @@ bool TaskProfiles::SetProcessProfiles(uid_t uid, pid_t pid,
             if (use_fd_cache) {
                 profile->EnableResourceCaching(ProfileAction::RCT_PROCESS);
             }
+            //LOG(INFO) << "SetProcessProfiles->ExecuteForTask(" << pid << "/" << uid << ") :" << name;
             if (!profile->ExecuteForProcess(uid, pid)) {
                 PLOG(WARNING) << "Failed to apply " << name << " process profile";
                 success = false;
@@ -834,6 +837,7 @@ bool TaskProfiles::SetTaskProfiles(int tid, const std::vector<std::string>& prof
             if (use_fd_cache) {
                 profile->EnableResourceCaching(ProfileAction::RCT_TASK);
             }
+            //LOG(INFO) << "SetTaskProfiles->ExecuteForTask(" << tid << ") :" << name;
             if (!profile->ExecuteForTask(tid)) {
                 PLOG(WARNING) << "Failed to apply " << name << " task profile";
                 success = false;
