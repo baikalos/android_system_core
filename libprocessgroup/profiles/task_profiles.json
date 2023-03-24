@@ -6,6 +6,11 @@
       "File": "background/cpus"
     },
     {
+      "Name": "RestrictedCapacityCPUs",
+      "Controller": "cpuset",
+      "File": "restricted/cpus"
+    },
+    {
       "Name": "HighCapacityCPUs",
       "Controller": "cpuset",
       "File": "foreground/cpus"
