@@ -255,13 +255,6 @@ cc_library_static {
         debuggable: {
             cflags: ["-DROOT_POSSIBLE"],
         },
-
-        malloc_not_svelte: {
-            cflags: ["-DUSE_SCUDO"],
-            whole_static_libs: ["libscudo"],
-            srcs: ["libdebuggerd/scudo.cpp"],
-            header_libs: ["scudo_headers"],
-        },
     },
 }
 
@@ -298,13 +291,6 @@ cc_test {
         "libdebuggerd/test/open_files_list_test.cpp",
         "libdebuggerd/test/utility_test.cpp",
     ],
-
-    product_variables: {
-        malloc_not_svelte: {
-            srcs: ["libdebuggerd/test/scudo_test.cpp"],
-            header_libs: ["scudo_headers"],
-        },
-    },
 
     target: {
         android: {
