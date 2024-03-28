@@ -413,6 +413,7 @@ void BatteryMonitor::updateValues(void) {
             path.clear();
             path.appendFormat("%s/%s/type", POWER_SUPPLY_SYSFS_PATH,
                               mChargerNames[i].string());
+
             switch(readPowerSupplyType(path)) {
             case ANDROID_POWER_SUPPLY_TYPE_AC:
                 mHealthInfo->chargerAcOnline = true;
@@ -438,7 +439,8 @@ void BatteryMonitor::updateValues(void) {
             }
 
             int ChargingCurrent =
-                  (access(SYSFS_BATTERY_CURRENT, R_OK) == 0) ? abs(getIntField(String8(SYSFS_BATTERY_CURRENT))) : 0;
+                    (access(SYSFS_BATTERY_CURRENT, R_OK) == 0) ? getIntField(String8(SYSFS_BATTERY_CURRENT)) * -1 : 0;
+                  //(access(SYSFS_BATTERY_CURRENT, R_OK) == 0) ? abs(getIntField(String8(SYSFS_BATTERY_CURRENT))) : 0;
 
             int ChargingVoltage =
                   (access(SYSFS_BATTERY_VOLTAGE, R_OK) == 0) ? getIntField(String8(SYSFS_BATTERY_VOLTAGE)) :
@@ -446,7 +448,8 @@ void BatteryMonitor::updateValues(void) {
 
             double power = ((double)ChargingCurrent / MILLION) *
                            ((double)ChargingVoltage / MILLION);
-            if (MaxPower < power) {
+
+            if ( abs((long)MaxPower) < abs((long)power) ) {
                 mHealthInfo->maxChargingCurrentMicroamps = ChargingCurrent;
                 mHealthInfo->maxChargingVoltageMicrovolts = ChargingVoltage;
                 MaxPower = power;
