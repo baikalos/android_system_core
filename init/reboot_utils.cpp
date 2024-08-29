@@ -37,7 +37,7 @@ namespace android {
 namespace init {
 
 static std::string init_fatal_reboot_target = "recovery";
-static bool init_fatal_panic = false;
+static bool init_fatal_panic = true;
 
 // this needs to read the /proc/* files directly because it is called before
 // ro.boot.* properties are initialized
