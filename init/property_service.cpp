@@ -1055,6 +1055,37 @@ static void property_initialize_ro_vendor_api_level() {
     }
 }
 
+bool load_properties_from_dir(const char* path, const char* filter,
+                                      std::map<std::string, std::string>* properties) {
+
+    std::unique_ptr<DIR, decltype(&closedir)> config_dir(opendir(path), closedir);
+    if (!config_dir) {
+        LOG(ERROR) << "Could not import directory '" << path << "'";
+        return false;
+    }
+
+    dirent* current_file;
+    std::vector<std::string> files;
+    while ((current_file = readdir(config_dir.get()))) {
+        // Ignore directories and only process regular files.
+        if (current_file->d_type == DT_REG) {
+            std::string current_path =
+                android::base::StringPrintf("%s/%s", path, current_file->d_name);
+            files.emplace_back(current_path);
+        }
+    }
+
+    std::sort(files.begin(), files.end());
+    for (const auto& file : files) {
+        if (!load_properties_from_file(file.c_str(), filter, properties)) {
+            LOG(ERROR) << "could not import file '" << file << "'";
+        }
+    }
+
+    return true;
+}
+
+
 void PropertyLoadBootDefaults() {
     // We read the properties and their values into a map, in order to always allow properties
     // loaded in the later property files to override the properties in loaded in the earlier
@@ -1122,6 +1153,15 @@ void PropertyLoadBootDefaults() {
     load_properties_from_file("/odm_dlkm/etc/build.prop", nullptr, &properties);
     load_properties_from_partition("odm", /* support_legacy_path_until */ 28);
     load_properties_from_partition("product", /* support_legacy_path_until */ 30);
+
+    load_properties_from_dir("/vendor/etc/baikal/addon.prop/", nullptr, &properties);
+    load_properties_from_dir("/vendor_dlkm/etc/baikal/addon.prop/", nullptr, &properties);
+
+    load_properties_from_dir("/odm_dlkm/etc/baikal/addon.prop/", nullptr, &properties);
+    load_properties_from_dir("/odm/etc/baikal/addon.prop/", nullptr, &properties);
+    load_properties_from_dir("/product/etc/baikal/addon.prop/", nullptr, &properties);
+    load_properties_from_dir("/system_ext/etc/baikal/addon.prop/", nullptr, &properties);
+    load_properties_from_dir("/system/etc/baikal/addon.prop/", nullptr, &properties);
 
     if (access(kDebugRamdiskProp, R_OK) == 0) {
         LOG(INFO) << "Loading " << kDebugRamdiskProp;
