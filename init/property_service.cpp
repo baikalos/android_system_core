@@ -1278,6 +1278,7 @@ static void ExportKernelBootProps() {
     } prop_map[] = {
             // clang-format off
         { "ro.boot.serialno",   "ro.serialno",   UNSET, },
+        { "ro.boot.serialno",   "ro.baikalos.serialno",   UNSET, },
         { "ro.boot.mode",       "ro.bootmode",   "unknown", },
         { "ro.boot.baseband",   "ro.baseband",   "unknown", },
         { "ro.boot.bootloader", "ro.bootloader", "unknown", },
@@ -1339,11 +1340,13 @@ static void SetSafetyNetProps() {
     //InitPropertySet("ro.boot.flash.locked", "1");
     InitPropertySet("ro.boot.vbmeta.device_state", "locked");
     InitPropertySet("ro.boot.verifiedbootstate", "green");
+    InitPropertySet("ro.boot.flash.locked", "1");
     InitPropertySet("ro.boot.veritymode", "enforcing");
     InitPropertySet("ro.boot.warranty_bit", "0");
     InitPropertySet("ro.warranty_bit", "0");
     InitPropertySet("ro.debuggable", "0");
     InitPropertySet("ro.secure", "1");
+    InitPropertySet("ro.secureboot.lockstate", "locked"); 
     InitPropertySet("ro.bootimage.build.type", "user");
     InitPropertySet("ro.build.type", "user");
     InitPropertySet("ro.build.keys", "release-keys");
@@ -1360,6 +1363,7 @@ static void SetSafetyNetProps() {
     InitPropertySet("vendor.boot.vbmeta.device_state", "locked");
     InitPropertySet("vendor.boot.verifiedbootstate", "green");
     InitPropertySet("oplusboot.verifiedbootstate", "green");
+    InitPropertySet("ro.crypto.state","encrypted");
 }
 
 void PropertyInit() {
@@ -1399,6 +1403,21 @@ void PropertyInit() {
     PropertyLoadBootDefaults();
 }
 
+
+static void HandleForcedClear() {
+    constexpr const char* UNSET = "";
+
+    std::string value = GetProperty("persist.baikal.purge_package_cache", "0");
+    if (value != UNSET && value != "0") {
+        bool old = weaken_prop_override_security;
+        weaken_prop_override_security = true;
+        std::string version = GetProperty("ro.build.version.incremental", "");
+        InitPropertySet("ro.original.version.incremental", version);
+        InitPropertySet("ro.build.version.incremental", "1029384756");
+        weaken_prop_override_security = old;
+    }
+}
+
 static void HandleInitSocket() {
     auto message = ReadMessage(init_socket);
     if (!message.ok()) {
@@ -1418,9 +1437,11 @@ static void HandleInitSocket() {
             // Read persistent properties after all default values have been loaded.
             auto persistent_properties = LoadPersistentProperties();
             for (const auto& persistent_property_record : persistent_properties.properties()) {
-                InitPropertySet(persistent_property_record.name(),
-                                persistent_property_record.value());
+                if( StartsWith(persistent_property_record.name(),"persist.spoof.") ) continue;
+                if( StartsWith(persistent_property_record.value(),"<baikal_removed>") ) continue;
+                InitPropertySet(persistent_property_record.name(), persistent_property_record.value());
             }
+            HandleForcedClear();
             InitPropertySet("ro.persistent_properties.ready", "true");
             persistent_properties_loaded = true;
             break;
