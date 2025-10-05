@@ -358,8 +358,8 @@ void RebootMonitorThread(unsigned int cmd, const std::string& reboot_target,
         if (sem_return == -1) {
             LOG(ERROR) << "Reboot thread timed out";
 
-            if (android::base::GetBoolProperty("ro.debuggable", false) == true) {
-                if (false) {
+            //if (android::base::GetBoolProperty("ro.debuggable", false) == true) {
+                //if (false) {
                     // SEPolicy will block debuggerd from running and this is intentional.
                     // But these lines are left to be enabled during debugging.
                     LOG(INFO) << "Try to dump init process call trace:";
@@ -367,7 +367,7 @@ void RebootMonitorThread(unsigned int cmd, const std::string& reboot_target,
                     int status;
                     logwrap_fork_execvp(arraysize(vdc_argv), vdc_argv, &status, false, LOG_KLOG,
                                         true, nullptr);
-                }
+                //}
                 LOG(INFO) << "Show stack for all active CPU:";
                 WriteStringToFile("l", PROC_SYSRQ);
 
@@ -375,7 +375,7 @@ void RebootMonitorThread(unsigned int cmd, const std::string& reboot_target,
                              "like "
                              "blocked in mutex or hardware register access:";
                 WriteStringToFile("w", PROC_SYSRQ);
-            }
+            //}
 
             // In shutdown case,notify kernel to sync and umount fs to read-only before shutdown.
             if (cmd == ANDROID_RB_POWEROFF || cmd == ANDROID_RB_THERMOFF) {
