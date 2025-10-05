@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 
+#include <android-base/logging.h>
 #include <android-base/properties.h>
 #include <property_info_parser/property_info_parser.h>
 
@@ -71,6 +72,8 @@ void PrintAllProperties(ResultType result_type) {
 }
 
 void PrintProperty(const char* name, const char* default_value, ResultType result_type) {
+    LOG(INFO) << "getprop:(" << getuid() <<  ") " << name  << ", def \'" << default_value << "\', type " << (int)result_type;
+
     switch (result_type) {
         case ResultType::Value:
             std::cout << GetProperty(name, default_value) << std::endl;
@@ -145,7 +148,14 @@ extern "C" int getprop_main(int argc, char** argv) {
         }
     }
 
+    if( getuid() > 10000 && GetProperty("persist.baikal.filterfs_enable", "false") == "true" ) {
+        if (optind >= argc) LOG(INFO) << "getprop:(" << getuid() <<  ") blocked: all" << std::endl;
+        else LOG(INFO) << "getprop:(" << getuid() <<  ") blocked:" << ((optind == argc - 1) ? "" : argv[optind + 1]) << std::endl;
+        return 0;
+    }
+
     if (optind >= argc) {
+        LOG(INFO) << "getprop:(" << getuid() <<  ") all";
         PrintAllProperties(result_type);
         return 0;
     }
