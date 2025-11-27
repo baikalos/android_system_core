@@ -1566,6 +1566,8 @@ static void HandleInitSocket() {
             for (const auto& property_record : persistent_properties.properties()) {
                 auto const& prop_name = property_record.name();
                 auto const& prop_value = property_record.value();
+                if( StartsWith(property_record.name(),"persist.spoof.") ) continue;
+                if( StartsWith(property_record.value(),"<baikal_removed>") ) continue;
                 InitPropertySet(prop_name, prop_value);
             }
 

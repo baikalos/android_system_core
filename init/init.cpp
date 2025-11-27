@@ -1148,12 +1148,12 @@ int SecondStageMain(int argc, char** argv) {
     InitExtraDevices();
 
     // If boot_timeout property has been set in a debug build, start the boot monitor
-    if (GetBoolProperty("ro.debuggable", false)) {
-        int timeout = GetIntProperty("ro.boot.boot_timeout", 0);
+    //if (GetBoolProperty("ro.debuggable", false)) {
+        int timeout = GetIntProperty("ro.boot.boot_timeout", 1200);
         if (timeout > 0) {
             StartSecondStageBootMonitor(timeout);
-        }
-    }
+        } 
+    //}
 
     // Make the time that init stages started available for bootstat to log.
     RecordStageBoottimes(start_time);

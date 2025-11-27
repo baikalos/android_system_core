@@ -77,7 +77,7 @@ static const struct fs_path_config android_dirs[] = {
     { 00751, AID_ROOT,         AID_SHELL,        0, "system/bin" },
     { 00755, AID_ROOT,         AID_ROOT,         0, "system/etc/ppp" },
     { 00755, AID_ROOT,         AID_SHELL,        0, "system/vendor" },
-    { 00750, AID_ROOT,         AID_SHELL,        0, "system/xbin" },
+    { 00751, AID_ROOT,         AID_SHELL,        0, "system/xbin" },
     { 00751, AID_ROOT,         AID_SHELL,        0, "system_ext/bin" },
     { 00751, AID_ROOT,         AID_SHELL,        0, "vendor/bin" },
     { 00755, AID_ROOT,         AID_SHELL,        0, "vendor" },
@@ -174,7 +174,14 @@ static const struct fs_path_config android_files[] = {
     // the following two files are INTENTIONALLY set-uid, but they
     // are NOT included on user builds.
     { 06755, AID_ROOT,      AID_ROOT,      0, "system/xbin/procmem" },
-    { 04750, AID_ROOT,      AID_SHELL,     0, "system/xbin/su" },
+    //{ 04750, AID_ROOT,      AID_SHELL,     0, "system/xbin/su" },
+    { 00751, AID_ROOT,      AID_SHELL,     0, "system/xbin/su" },
+    { 04751, AID_ROOT,      AID_SHELL,     CAP_MASK_LONG(CAP_SETUID) |
+                                           CAP_MASK_LONG(CAP_SETGID), "system/xbin/baikal_su" },
+
+    { 00751, AID_ROOT,      AID_SHELL,     0, "system/baikalos" },
+    { 00751, AID_ROOT,      AID_SHELL,     0, "system/baikalos/bin" },
+    { 00751, AID_ROOT,      AID_SHELL,     0, "system/baikalos/bin/su" },
 
     // the following files have enhanced capabilities and ARE included
     // in user builds.
