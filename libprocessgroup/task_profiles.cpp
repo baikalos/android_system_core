@@ -703,6 +703,11 @@ bool CompactMemcgAction::Execute(const std::string& memory_current_path,
     std::string reclaim_str;
     if (!GenerateReclaimString(memory_current_path, reclaim_str)) return false;
 
+    if (access(memory_reclaim_path.c_str(), F_OK) != 0) {
+        // Ignore for old kernels
+        return true;
+    }
+
     if (!WriteStringToFile(reclaim_str, memory_reclaim_path) && errno != EAGAIN) {
         // Reclaim of the entire memcg is likely to fail with EAGAIN. Ignore this case here.
         PLOG(ERROR) << "Could not write " << reclaim_str << " to " << memory_reclaim_path;
@@ -900,6 +905,7 @@ TaskProfiles::TaskProfiles() {
     // load API-level specific system task profiles if available
     unsigned int api_level = GetUintProperty<unsigned int>("ro.product.first_api_level", 0);
     if (api_level > 0) {
+        if( api_level < 28 ) api_level = 28;
         std::string api_profiles_path =
                 android::base::StringPrintf(TEMPLATE_TASK_PROFILE_API_FILE, api_level);
         if (!access(api_profiles_path.c_str(), F_OK) || errno != ENOENT) {
@@ -921,9 +927,11 @@ bool TaskProfiles::Load(const CgroupMap& cg_map, const std::string& file_name) {
     std::string json_doc;
 
     if (!android::base::ReadFileToString(file_name, &json_doc)) {
-        LOG(ERROR) << "Failed to read task profiles from " << file_name;
+        LOG(ERROR) << "TaskProfiles: Failed to read task profiles from " << file_name;
         return false;
     }
+
+    LOG(INFO) << "TaskProfiles: Loading task profiles from " << file_name;
 
     Json::CharReaderBuilder builder;
     std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
