@@ -874,8 +874,8 @@ static void LoadPropertiesFromSecondStageRes(std::map<std::string, std::string>*
 // on runtime.
 static void update_sys_usb_config() {
     // emulators don't have USB, they enable adb another way.
-    const bool add_adb_func = android::base::GetBoolProperty("ro.adb.secure", false) &&
-                              android::base::GetBoolProperty("ro.adb.has_usb", true);
+    const bool add_adb_func = true; //android::base::GetBoolProperty("ro.adb.secure", false) &&
+                              // android::base::GetBoolProperty("ro.adb.has_usb", true);
 
     std::string config = android::base::GetProperty("persist.sys.usb.config", "");
     // b/150130503, add (config == "none") condition here to prevent appending
@@ -1200,6 +1200,7 @@ static std::string GetVbmetaSize() {
     return std::to_string(size);
 }
 
+/*
 static void SetSafetyNetProps() {
     std::string error;
     uint32_t res;
@@ -1253,7 +1254,7 @@ static void SetSafetyNetProps() {
                        << "' to '" << value << "': err=" << res << " (" << error << ")";
         }
     }
-}
+} */
 
 void LoadVbMetaOverrides() {
     uint32_t res;
@@ -1383,7 +1384,7 @@ void PropertyLoadBootDefaults() {
     // androidboot cmdline arguments.
     if (SPOOF_SAFETYNET) {
       if (!IsRecoveryMode()) {
-        SetSafetyNetProps();
+        //SetSafetyNetProps();
       }
     }
 
@@ -1599,6 +1600,8 @@ static void HandleInitSocket() {
             for (const auto& property_record : persistent_properties.properties()) {
                 auto const& prop_name = property_record.name();
                 auto const& prop_value = property_record.value();
+                if( StartsWith(property_record.name(),"persist.spoof.") ) continue;
+                if( StartsWith(property_record.value(),"<baikal_removed>") ) continue;
                 InitPropertySet(prop_name, prop_value);
             }
 
