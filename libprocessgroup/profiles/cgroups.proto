@@ -46,4 +46,5 @@ message Cgroups2 {
     string uid = 3 [json_name = "UID"];
     string gid = 4 [json_name = "GID"];
     repeated Cgroup controllers = 5 [json_name = "Controllers"];
+    bool is_optional = 6 [json_name = "Optional"];
 }

@@ -27,10 +27,12 @@
     "Mode": "0775",
     "UID": "system",
     "GID": "system",
+    "Optional": true,
     "Controllers": [
       {
         "Controller": "freezer",
-        "Path": "."
+        "Path": ".",
+        "Optional": true
       },
       {
         "Controller": "memory",
